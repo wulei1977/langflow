@@ -69,7 +69,7 @@ from langflow.services.database.models.api_key.crud import check_key, create_api
 from langflow.services.database.models.api_key.model import ApiKey, ApiKeyCreate
 from langflow.services.database.models.user.crud import get_user_by_username
 from langflow.services.database.models.user.model import User
-from langflow.services.deps import get_service, get_settings_service
+from langflow.services.deps import get_service
 
 # Constants
 ALL_INTERFACES_HOST = "0.0.0.0"  # noqa: S104
