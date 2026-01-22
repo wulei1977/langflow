@@ -4,12 +4,12 @@ This component manages the iteration cycle for workflows that need accumulation.
 It accumulates data across iterations, building up state over time.
 
 Flow pattern (agent example):
-MessageHistory → WhileLoop.initial_state (past conversations)
-ChatInput → WhileLoop.input_value (current message)
-WhileLoop → CallModel → [Tool Calls] → ExecuteTool
+MessageHistory → WhileLoop (initial state)
+ChatInput → WhileLoop (input)
+WhileLoop → AgentStep → [Tool Calls] → ExecuteTool
     ↑                                        ↓
     +----------------------------------------+
-                 ↓ (CallModel ai_message - done)
+                 ↓ (Response - done)
             ChatOutput
 """
 
@@ -29,13 +29,13 @@ class WhileLoopComponent(Component):
     """Manages iteration and state accumulation for loops.
 
     This component enables visual loops with state accumulation by:
-    1. Combining initial_state (if provided) with input_value on first iteration
+    1. Combining initial state (if provided) with input on first iteration
     2. Accumulating new data from each iteration with existing state
-    3. Continuing iterations until max_iterations or loop body stops
+    3. Continuing iterations until max iterations or loop body stops
 
     The loop stops when:
-    - max_iterations is reached
-    - A downstream component stops the branch (e.g., CallModel's ai_message)
+    - Max iterations is reached
+    - A downstream component stops the branch (e.g., Agent Step's Response output)
     """
 
     display_name = "While Loop"
@@ -72,7 +72,7 @@ class WhileLoopComponent(Component):
             method="loop_output",
             allows_loop=True,
             loop_types=["DataFrame"],
-            info="Connect to CallModel. Outputs accumulated DataFrame for each iteration.",
+            info="Connect to Agent Step. Outputs accumulated DataFrame for each iteration.",
         ),
     ]
 
