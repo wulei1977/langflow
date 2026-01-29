@@ -325,6 +325,26 @@ class RunFlowBaseComponent(Component):
         Returns:
             The resolved output.
         """
+        # Handle Tool Mode: when called via Tool, flow_tweak_data is passed as a Pydantic model
+        # (InnerModel) or dict in _attributes["flow_tweak_data"] with keys like "ChatInput-xxx~input_value"
+        # We need to extract it here because _pre_run_setup() may have been called earlier
+        # (during build_results) before the Tool set the flow_tweak_data
+        tool_mode_tweaks = self._attributes.get("flow_tweak_data", {})
+        if tool_mode_tweaks:
+            # Convert Pydantic model to dict if necessary
+            if hasattr(tool_mode_tweaks, "model_dump"):
+                tool_mode_tweaks = tool_mode_tweaks.model_dump()
+            elif hasattr(tool_mode_tweaks, "dict"):
+                tool_mode_tweaks = tool_mode_tweaks.dict()
+
+            if isinstance(tool_mode_tweaks, dict):
+                # Extract tweaks from the nested dict format used by Tool Mode
+                extracted_tweaks = self._extract_tweaks_from_keyed_values(tool_mode_tweaks)
+                if extracted_tweaks:
+                    self.flow_tweak_data = extracted_tweaks
+                    self._flow_run_inputs = self._build_inputs_from_tweaks(self.flow_tweak_data)
+                    logger.debug(f"Tool Mode: extracted flow_tweak_data = {self.flow_tweak_data}")
+
         run_outputs = await self._get_cached_run_outputs(
             user_id=self.user_id,
             tweaks=self.flow_tweak_data,
