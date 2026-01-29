@@ -61,20 +61,27 @@ export default function SessionSelector({
   };
 
   const handleConfirm = () => {
+    const trimmedSession = editedSession.trim();
+    // Prevent empty session ID
+    if (!trimmedSession) {
+      setEditedSession(session);
+      setIsEditing(false);
+      return;
+    }
     setIsEditing(false);
-    if (editedSession.trim() !== session) {
+    if (trimmedSession !== session) {
       updateSessionName(
-        { old_session_id: session, new_session_id: editedSession.trim() },
+        { old_session_id: session, new_session_id: trimmedSession },
         {
           onSuccess: () => {
             if (isVisible) {
-              updateVisibleSession(editedSession.trim());
+              updateVisibleSession(trimmedSession);
             }
             if (
               selectedView?.type === "Session" &&
               selectedView?.id === session
             ) {
-              setSelectedView({ type: "Session", id: editedSession.trim() });
+              setSelectedView({ type: "Session", id: trimmedSession });
             }
           },
         },
